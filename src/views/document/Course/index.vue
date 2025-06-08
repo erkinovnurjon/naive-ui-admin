@@ -8,21 +8,18 @@
           placeholder="O'qituvchi"
           clearable
           style="width: 250px"
+          :render-label="renderLabel"
           @update:value="fetchCourses"
-        >
-          <template #arrow>
-            <i class="flaticon-down-arrow fs-12"></i>
-          </template>
-        </n-select>
+        />
       </div>
       <div class="header-right">
         <n-button
           type="primary"
-          @click="router.push('/courses/edit/0')"
+          @click="router.push('/courses/all/edit/0')"
           class="me-2"
         >
           <template #icon>
-            <i class="flaticon-plus"></i>
+            <n-icon><PlusOutline /></n-icon>
           </template>
           Yaratish
         </n-button>
@@ -34,7 +31,7 @@
           @input="handleSearch"
         >
           <template #prefix>
-            <i class="flaticon-search-interface-symbol"></i>
+            <n-icon><SearchOutline /></n-icon>
           </template>
         </n-input>
       </div>
@@ -52,7 +49,7 @@
 
       <n-empty v-else description="Ma'lumot topilmadi" class="empty-state">
         <template #icon>
-          <i class="flaticon-search-interface-symbol fs-4"></i>
+          <n-icon><SearchOutline /></n-icon>
         </template>
       </n-empty>
 
@@ -81,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, h } from "vue";
+import { ref, reactive, onMounted, h } from "vue";
 import { useRouter } from "vue-router";
 import {
   NButton,
@@ -93,6 +90,7 @@ import {
   NPagination,
   NSelect,
   NSpin,
+  NIcon,
   NDropdown,
   useMessage,
   type DataTableColumns,
@@ -109,6 +107,8 @@ import {
   TrashOutline as DeleteIcon,
   PencilOutline as EditIcon,
   EllipsisVerticalOutline as DotsIcon,
+  SearchOutline,
+  AddOutline as PlusOutline,
 } from "@vicons/ionicons5";
 
 const router = useRouter();
@@ -125,25 +125,6 @@ const courseIdToDelete = ref<number | null>(null);
 const defaultCourseImage = "/src/assets/images/courses/course-default.jpg";
 
 // Filters
-
-const actionOptions = [
-  {
-    label: "Tahrirlash",
-    key: "edit",
-    icon: () => h(EditIcon, { class: "text-base" }),
-  },
-  {
-    label: "Ko'rish",
-    key: "view",
-    icon: () => h(EyeIcon, { class: "text-base" }),
-  },
-  {
-    label: "O'chirish",
-    key: "delete",
-    icon: () => h(DeleteIcon, { class: "text-base" }),
-  },
-];
-const dropdownCourseId = ref<number | null>(null);
 const filters = reactive({
   page: 1,
   pageSize: 10,
@@ -154,9 +135,39 @@ const filters = reactive({
 });
 
 const totalCourses = ref(0);
-const totalPages = computed(() => {
-  return Math.ceil(totalCourses.value / filters.pageSize) || 0;
-});
+
+const renderLabel = (option: any) => {
+  return h(
+    "span",
+    {
+      style: {
+        color: "#1e90ff",
+        fontWeight: "500",
+      },
+    },
+    option.text
+  );
+};
+
+const actionOptions = [
+  {
+    label: "Tahrirlash",
+    key: "edit",
+    icon: () => h(NIcon, { size: 18 }, () => h(EditIcon)),
+  },
+  {
+    label: "Ko'rish",
+    key: "view",
+    icon: () => h(NIcon, { size: 18 }, () => h(EyeIcon)),
+  },
+  {
+    label: "O'chirish",
+    key: "delete",
+    icon: () => h(NIcon, { size: 18 }, () => h(DeleteIcon)),
+  },
+];
+
+const dropdownCourseId = ref<number | null>(null);
 
 const handleDropdownSelect = (key: string) => {
   const id = dropdownCourseId.value;
@@ -195,20 +206,22 @@ const columns: DataTableColumns<any> = [
                 alt: "course-image",
                 class: "w-full h-full object-cover block",
               })
-            : h(SettingsIcon, { class: "text-blue-600 text-xl" }) // default icon
+            : h(NIcon, { size: 24 }, () => h(SettingsIcon))
         ),
         h("div", null, [
           h(
             "a",
             {
-              class: "no-underline font-bold text-gray-800 hover:underline",
+              class:
+                "no-underline font-bold text-gray-800 hover:underline cursor-pointer",
               onClick: () => editCourse(row.id),
-              style: "cursor: pointer",
             },
             row.title
           ),
           h("div", { class: "flex items-center text-gray-500 mt-1 text-sm" }, [
-            h(BookIcon, { class: "text-blue-600 mr-2 text-base" }),
+            h(NIcon, { size: 16, class: "mr-2 text-blue-600" }, () =>
+              h(BookIcon)
+            ),
             `Mavzular soni: ${row.topicCount}`,
           ]),
         ]),
@@ -220,7 +233,7 @@ const columns: DataTableColumns<any> = [
     sorter: true,
     render: (row) =>
       h("div", { class: "flex items-center gap-2" }, [
-        h(PersonIcon, { class: "text-blue-600 text-xl" }),
+        h(NIcon, { size: 18, class: "text-blue-600" }, () => h(PersonIcon)),
         row.employee,
       ]),
   },
@@ -254,7 +267,7 @@ const columns: DataTableColumns<any> = [
                 onClick: () => (dropdownCourseId.value = row.id),
               },
               {
-                icon: () => h(DotsIcon, { class: "text-gray-600" }),
+                icon: () => h(NIcon, { size: 18 }, () => h(DotsIcon)),
               }
             ),
         }
@@ -324,11 +337,11 @@ const handleConfirmDelete = async () => {
 };
 
 const editCourse = (id: number) => {
-  router.push(`/courses/edit/${id}`);
+  router.push(`/courses/all/edit/${id}`);
 };
 
 const goVideo = (courseId: number) => {
-  router.push(`/courses/view/${courseId}`);
+  router.push(`/courses/all/view/${courseId}`);
 };
 
 const handleSearch = () => {
@@ -347,7 +360,6 @@ const handlePerPageChange = (pageSize: number) => {
   fetchCourses();
 };
 
-// Lifecycle hooks
 onMounted(() => {
   fetchCourses();
   fetchEmployeeList();
@@ -377,22 +389,6 @@ onMounted(() => {
   gap: 15px;
 }
 
-.courses-list-card .course-thumbnail {
-  width: 90px;
-  height: 60px;
-  overflow: hidden;
-  border-radius: 6px;
-  flex-shrink: 0;
-  background-color: #f2f2f2;
-}
-
-.courses-list-card .course-thumbnail .thumbnail-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
 .courses-list-card .empty-state {
   min-height: 250px;
   display: flex;
@@ -401,38 +397,24 @@ onMounted(() => {
   align-items: center;
 }
 
-/* Naive UI pagination modifier */
 .courses-list-card ::v-deep(.n-pagination) {
   margin-top: 20px;
   justify-content: flex-end;
 }
 
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  right: 0;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  z-index: 1000;
-  min-width: 150px;
-}
+@media (max-width: 768px) {
+  .courses-list-card .card-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
 
-.dropdown-menu .dropdown-item {
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: var(--n-text-color);
-  text-decoration: none;
-}
+  .courses-list-card .card-header .header-right {
+    width: 100%;
+  }
 
-.dropdown-menu .dropdown-item:hover {
-  background-color: #f5f5f5;
-}
-
-/* Dropdown show on hover */
-::v-deep(.n-button[text]:hover) .dropdown-menu {
-  display: block;
+  .courses-list-card .card-header .header-right .n-input {
+    flex-grow: 1;
+  }
 }
 </style>

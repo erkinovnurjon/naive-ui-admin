@@ -40,7 +40,7 @@
           Kirish
         </n-button>
 
-        <n-button block class="mt-3" @click="redirectToHemis">
+        <n-button block class="mt-5" @click="redirectToHemis">
           HEMIS ID bilan kirish
         </n-button>
       </n-form>
@@ -91,7 +91,7 @@ const handleLogin = async () => {
   await formRef.value?.validate(async (errors: any) => {
     if (!errors) {
       try {
-        const response = await AccountService.Login(form);
+        const response: any = await AccountService.Login(form);
         useLocalStorage().setItem("token", response.token);
         useLocalStorage().setItem("user", JSON.stringify(response.user));
 
@@ -137,7 +137,7 @@ onMounted(() => {
 
 const handleHemisCallback = async (code: string) => {
   try {
-    const response = await AccountService.HemisLogin({ code });
+    const response: any = await AccountService.HemisLogin({ code });
     useLocalStorage().setItem("token", response.token);
     useLocalStorage().setItem("user", JSON.stringify(response.user));
 

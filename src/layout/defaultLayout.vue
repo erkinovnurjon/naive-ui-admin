@@ -53,8 +53,7 @@ const logout = () => {
   useLocalStorage().removeItem("token");
   useLocalStorage().removeItem("user");
 
-  authStore.setToken(null);
-  authStore.setUser(null);
+  authStore.logout();
 
   message.success("Tizimdan chiqdingiz!");
   router.push("/login");
